@@ -93,8 +93,15 @@ namespace dropkick.Configuration.Dsl.Iis
 
         public override void RegisterRealTasks(PhysicalServer s)
         {
-            var scrubbedPath = _path.ConvertUncShareToLocalPath(s, PathOnServer);
-
+            string scrubbedPath;
+            if (RemotePathHelper.IsUncPath(PathOnServer))
+            {
+                scrubbedPath = _path.ConvertUncShareToLocalPath(s, PathOnServer);
+            }
+            else
+            {
+                scrubbedPath = PathOnServer;
+            }
 
             if (Version == IisVersion.Six)
             {
