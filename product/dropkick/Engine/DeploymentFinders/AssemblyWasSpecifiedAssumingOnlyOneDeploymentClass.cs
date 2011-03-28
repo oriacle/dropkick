@@ -13,11 +13,11 @@
 namespace dropkick.Engine.DeploymentFinders
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using Configuration.Dsl;
+    using Exceptions;
     using log4net;
 
     public class AssemblyWasSpecifiedAssumingOnlyOneDeploymentClass :
@@ -33,15 +33,30 @@ namespace dropkick.Engine.DeploymentFinders
 
             string path = FindFile(assemblyName);
 
-            Assembly asm = Assembly.LoadFile(path);
-            IEnumerable<Type> tt = asm.GetTypes().Where(t => typeof (Deployment).IsAssignableFrom(t));
+            try
+            {
+                var asm = Assembly.LoadFile(path);
+                var foundDeploymentTypes = asm.GetTypes().Where(t => typeof (Deployment).IsAssignableFrom(t));
 
-            return new TypeWasSpecifiedAssumingItHasADefaultConstructor().Find(tt.First());
+                if(foundDeploymentTypes.Count() > 1)
+                    throw new DeploymentConfigurationException("There was more than one deployment in the assembly '{0}'".FormatWith(assemblyName));
+
+                return new TypeWasSpecifiedAssumingItHasADefaultConstructor().Find(foundDeploymentTypes.First());
+            }
+            catch (BadImageFormatException bifex)
+            {
+                var msg = "There was an issue with loading the file '{0}' at path '{1}'.".FormatWith(assemblyName, path);
+                
+                _log.Debug("FUSION LOG");
+                _log.Debug(bifex.FusionLog);
+
+                throw new DeploymentConfigurationException(msg, bifex);
+            }
         }
 
         #endregion
 
-        string FindFile(string file)
+        static string FindFile(string file)
         {
             string p = Path.Combine(Environment.CurrentDirectory, file);
             _log.DebugFormat("Looking for deployment dll '{0}' at '{1}'", file, p);
