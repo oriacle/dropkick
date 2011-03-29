@@ -12,19 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace dropkick.Configuration.Dsl.NServiceBus
 {
+    using System;
+
     using dropkick.DeploymentModel;
     using dropkick.FileSystem;
     using dropkick.Tasks;
     using dropkick.Tasks.NServiceBus;
 
-    public class NServiceBusConfigurator :
+    public class ProtoNServiceBusInstallTask :
         BaseProtoTask,
-        NServiceBusOptions
+        NServiceBusInstallOptions
     {
         readonly Path _path;
+        private readonly string _exeName = "nservicebus.host.exe";
+
         string _instanceName;
         string _location;
-        string _exeName;
         string _password;
         string _username;
         string _displayName;
@@ -32,50 +35,53 @@ namespace dropkick.Configuration.Dsl.NServiceBus
         string _description;
         bool _startManualy;
         
-        public NServiceBusConfigurator(Path path)
+        public ProtoNServiceBusInstallTask(DotNetPath path, string location)
         {
             _path = path;
-        }
-
-        public void ExeName(string name)
-        {
-            _exeName = name;
-        }
-
-        public void Instance(string name)
-        {
-            _instanceName = name;
-        }
-
-        public void LocatedAt(string location)
-        {
             _location = location;
         }
 
-        public void PassCredentials(string username, string password)
+        public NServiceBusInstallOptions Instance(string name)
+        {
+            _instanceName = name;
+            return this;
+        }
+
+        public NServiceBusInstallOptions LocatedAt(string location)
+        {
+            _location = location;
+            return this;
+        }
+
+        public NServiceBusInstallOptions PassCredentials(string username, string password)
         {
             _username = username;
             _password = password;
+            return this;
         }
 
-        public void DisplayName(string displayName)
+        public NServiceBusInstallOptions DisplayName(string displayName)
         {
             _displayName = displayName;
+            return this;
         }
 
-        public void ServiceName(string serviceName)
+        public NServiceBusInstallOptions ServiceName(string serviceName)
         {
             _serviceName = serviceName;
+            return this;
         }
 
-        public void Description(string description)
+        public NServiceBusInstallOptions Description(string description)
         {
             _description = description;
+            return this;
         }
 
-        public void ManualStart(bool startManually)
+        public NServiceBusInstallOptions ManualStart(bool startManually)
         {
             _startManualy = startManually;
+            return this;
         }
 
         public override void RegisterRealTasks(PhysicalServer site)
@@ -92,11 +98,11 @@ namespace dropkick.Configuration.Dsl.NServiceBus
 
             if (site.IsLocal)
             {
-                site.AddTask(new LocalNServiceBusTask(_exeName, location, _instanceName, _username, _password, _serviceName, _displayName, _description, _startManualy));
+                site.AddTask(new LocalNServiceBusInstallTask(_exeName, location, _instanceName, _username, _password, _serviceName, _displayName, _description, _startManualy));
             }
             else
             {
-                site.AddTask(new RemoteNServiceBusTask(_exeName, location, _instanceName, site, _username, _password, _serviceName, _displayName, _description, _startManualy));
+                site.AddTask(new RemoteNServiceBusInstallTask(_exeName, location, _instanceName, site, _username, _password, _serviceName, _displayName, _description, _startManualy));
             }
         }
     }

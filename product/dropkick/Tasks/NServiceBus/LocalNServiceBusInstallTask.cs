@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2010 The Apache Software Foundation.
+// Copyright 2007-2010 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,19 +16,20 @@ namespace dropkick.Tasks.NServiceBus
 
     using CommandLine;
     using DeploymentModel;
+    using FileSystem;
     using Prompting;
 
-    public class RemoteNServiceBusTask :
+    public class LocalNServiceBusInstallTask :
         BaseTask
     {
-        readonly RemoteCommandLineTask _task;
+        readonly LocalCommandLineTask _task;
         readonly PromptService _prompt = new ConsolePromptService();
 
-        public RemoteNServiceBusTask(string exeName, string location, string instanceName, PhysicalServer site, string username, string password,
-            string serviceName, string displayName, string description, bool startManually)
+        public LocalNServiceBusInstallTask(string exeName, string location, string instanceName, string username, string password,
+             string serviceName, string displayName, string description, bool startManually)
         {
             StringBuilder args = new StringBuilder("/install ");
-
+            
             if (username != null && password != null)
             {
                 var user = username;
@@ -41,24 +42,23 @@ namespace dropkick.Tasks.NServiceBus
                 args.Append(" /username:{0} /password:{1}".FormatWith(user, pass));
             }
 
-            if (!string.IsNullOrEmpty(instanceName)) args.AppendFormat(" /instanceName:{0}", instanceName);
+            if (!string.IsNullOrEmpty(instanceName)) args.AppendFormat(" /instance:{0}", instanceName);
             if (!string.IsNullOrEmpty(serviceName)) args.AppendFormat(" /serviceName:{0}", serviceName);
             if (!string.IsNullOrEmpty(displayName)) args.AppendFormat(" /displayName:{0}", displayName);
             if (!string.IsNullOrEmpty(description)) args.AppendFormat(" /description:{0}", description);
             if (startManually) args.Append(" /startManually");
 
-            _task = new RemoteCommandLineTask(exeName)
+            _task = new LocalCommandLineTask(new DotNetPath(), exeName)
                         {
-                            Args = args.ToString(),
+                            Args = args.ToString(), 
                             ExecutableIsLocatedAt = location,
-                            Machine = site.Name,
                             WorkingDirectory = location
                         };
         }
 
         public override string Name
         {
-            get { return "[NServiceBus] remote Installing"; }
+            get { return "[NServiceBus] local Installing"; }
         }
 
         public override DeploymentResult VerifyCanRun()
@@ -68,7 +68,7 @@ namespace dropkick.Tasks.NServiceBus
 
         public override DeploymentResult Execute()
         {
-            Logging.Coarse("[NServiceBus] Installing a remote NServiceBus service");
+            Logging.Coarse("[NServiceBus] Installing a local NServiceBus service.");
             return _task.Execute();
         }
     }

@@ -1,4 +1,4 @@
-// Copyright 2007-2010 The Apache Software Foundation.
+﻿// Copyright 2007-2010 The Apache Software Foundation.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,20 +16,19 @@ namespace dropkick.Tasks.NServiceBus
 
     using CommandLine;
     using DeploymentModel;
-    using FileSystem;
     using Prompting;
 
-    public class LocalNServiceBusTask :
+    public class RemoteNServiceBusInstallTask :
         BaseTask
     {
-        readonly LocalCommandLineTask _task;
+        readonly RemoteCommandLineTask _task;
         readonly PromptService _prompt = new ConsolePromptService();
 
-        public LocalNServiceBusTask(string exeName, string location, string instanceName, string username, string password,
-             string serviceName, string displayName, string description, bool startManually)
+        public RemoteNServiceBusInstallTask(string exeName, string location, string instanceName, PhysicalServer site, string username, string password,
+            string serviceName, string displayName, string description, bool startManually)
         {
             StringBuilder args = new StringBuilder("/install ");
-            
+
             if (username != null && password != null)
             {
                 var user = username;
@@ -48,17 +47,18 @@ namespace dropkick.Tasks.NServiceBus
             if (!string.IsNullOrEmpty(description)) args.AppendFormat(" /description:{0}", description);
             if (startManually) args.Append(" /startManually");
 
-            _task = new LocalCommandLineTask(new DotNetPath(), exeName)
-                        {
-                            Args = args.ToString(), 
-                            ExecutableIsLocatedAt = location,
-                            WorkingDirectory = location
-                        };
+            _task = new RemoteCommandLineTask(exeName)
+            {
+                Args = args.ToString(),
+                ExecutableIsLocatedAt = location,
+                Machine = site.Name,
+                WorkingDirectory = location
+            };
         }
 
         public override string Name
         {
-            get { return "[NServiceBus] local Installing"; }
+            get { return "[NServiceBus] remote Installing"; }
         }
 
         public override DeploymentResult VerifyCanRun()
@@ -68,7 +68,7 @@ namespace dropkick.Tasks.NServiceBus
 
         public override DeploymentResult Execute()
         {
-            Logging.Coarse("[NServiceBus] Installing a local NServiceBus service.");
+            Logging.Coarse("[NServiceBus] Installing a remote NServiceBus service");
             return _task.Execute();
         }
     }
