@@ -67,7 +67,7 @@ namespace dropkick.Tasks.WinService
                         c.Stop();
                         c.WaitForStatus(ServiceControllerStatus.Stopped, 30.Seconds());
 
-                        WaitForProcessToDie(pid);
+                        //WaitForProcessToDie(pid);
                     }
                 }
                 result.AddGood("Stopped Service '{0}'", ServiceName);
