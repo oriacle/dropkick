@@ -52,6 +52,10 @@ namespace dropkick.Engine
 
             string roles = commandLineElements.GetDefinition("roles", "ALL");
             arguments.Role = roles;
+
+            string quiet = commandLineElements.GetDefinition("quiet", "false");
+            arguments.Quiet = quiet != "false";
+
         }
 
         static IEnumerable<ICommandLineElement> P(string commandLine)

@@ -26,7 +26,7 @@ namespace dropkick.Engine
             Deployment = "SEARCH";
             Command = DeploymentCommands.Trace;
             SettingsDirectory = ".\\settings";
-            
+            Quiet = false;
         }
 
         public string Environment { get; set; }
@@ -35,6 +35,7 @@ namespace dropkick.Engine
         public DeploymentCommands Command { get; set; }
         public RoleToServerMap ServerMappings { get; set; }
         public string SettingsDirectory { get; set;}
+        public bool Quiet { get; set; }
         public string PathToSettingsFile
         {
             get
