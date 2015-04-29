@@ -80,12 +80,13 @@ namespace dropkick.Engine
                 newArgs.ServerMappings.Merge(maps);
                 DisplayServerMappingsForEnvironment(newArgs.ServerMappings);
 
-                
-                 
-                _coarseLog.Info("");
-                _coarseLog.Info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                _coarseLog.Info("Please review the settings above when you are ready,");
-                _coarseLog.Info("  Press 'ctrl+c' to cancel.");
+                if (!newArgs.Quiet)
+                {
+                    _coarseLog.Info("");
+                    _coarseLog.Info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                    _coarseLog.Info("Please review the settings above when you are ready,");
+                    _coarseLog.Info("  Press 'ctrl+c' to cancel.");
+                }
                 
                 if(deployment.HardPrompt)
                 {
@@ -100,7 +101,7 @@ namespace dropkick.Engine
                         }
                     } while (wrong);
                 }
-                else
+                else if (!newArgs.Quiet)
                 {
                     _coarseLog.Info("  Press enter to kick it out there");
                     Console.ReadKey(true);
